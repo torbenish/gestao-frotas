@@ -1,0 +1,87 @@
+{
+  "editor.formatOnSave": true,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "Dracula Refined",
+  "terminal.integrated.fontSize": 16,
+  "files.autoSave": "afterDelay",
+  "editor.fontSize": 16,
+  "workbench.startupEditor": "none",
+  "cSpell.language": "en,pt,pt-BR",
+  "editor.fontFamily": "'JetBrains Mono', Consolas, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.lineHeight": 1.7,
+  "editor.letterSpacing": 0.4,
+  "editor.smoothScrolling": true,
+  "material-icon-theme.folders.color": "#ef5350",
+  "material-icon-theme.folders.theme": "specific",
+  "git.openRepositoryInParentFolders": "never",
+  "editor.cursorBlinking": "expand",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.wordWrap": "on",
+  "liveServer.settings.donotShowInfoMsg": true,
+  "extensions.ignoreRecommendations": true,
+  "cSpell.userWords": [
+    "autoincrement",
+    "classpath",
+    "COTEC",
+    "datasource",
+    "dotenv",
+    "gestao",
+    "nestjs",
+    "pids",
+    "postgres",
+    "postgresql",
+    "renavam",
+    "sonner",
+    "uuid"
+  ],
+  "security.workspace.trust.untrustedFiles": "open",
+  "editor.fontWeight": "normal",
+  "editor.pasteAs.preferences": [],
+  "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font', Consolas, 'Courier New', monospace",
+  "terminal.integrated.lineHeight": 1.2,
+  "terminal.integrated.letterSpacing": 1,
+  "biome.lsp.bin": "./node_modules/@biomejs/biome/bin/biome",
+  "cSpell.ignoreWords": ["bitnami"],
+  "biome.suggestInstallingGlobally": false,
+  "peacock.remoteColor": "#1857a4",
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#1f6fd0",
+    "activityBar.background": "#1f6fd0",
+    "activityBar.foreground": "#e7e7e7",
+    "activityBar.inactiveForeground": "#e7e7e799",
+    "activityBarBadge.background": "#ee90bb",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#e7e7e799",
+    "sash.hoverBorder": "#1f6fd0",
+    "statusBar.background": "#1857a4",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#1f6fd0",
+    "statusBarItem.remoteBackground": "#1857a4",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "titleBar.activeBackground": "#1857a4",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#1857a499",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  // CONFIGURAÇÃO CORRIGIDA ABAIXO
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit",
+    "source.fixAll.biome": "explicit"
+  }
+}

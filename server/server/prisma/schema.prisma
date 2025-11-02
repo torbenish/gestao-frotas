@@ -1,0 +1,361 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===================
+// ENUMS
+// ===================
+
+enum Role {
+  EMPLOYEE
+  COORDINATOR
+  MANAGER
+  ADMIN
+}
+
+enum TripStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+enum TripPriority {
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TripType {
+  ONE_WAY
+  ROUND_TRIP_SAME_DAY
+  ROUND_TRIP_WITH_STAY
+  MULTI_STOP
+  SHUTTLE
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_TRIP
+  INACTIVE
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+}
+
+enum VehicleType {
+  CAR
+  MOTORCYCLE
+}
+
+enum FuelType {
+  GASOLINE
+  ETHANOL
+  DIESEL
+  ELECTRIC
+  HYBRID
+}
+
+enum TransmissionType {
+  MANUAL
+  AUTOMATIC
+}
+
+enum CNHType {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum ChargeType {
+  FUEL // Combustivel
+  TOLL // Pedagio
+  PARKING //Estacionamento
+  ACCOMMODATION //Hospedagem
+  MEALS //Alimentação/Refeição
+  CORRECTIVE_MAINTENANCE //Manutenção corretiva
+  PREVENTIVE_MAINTENANCE //Manutenção preventiva
+  OTHER
+}
+
+enum InfractionStatus {
+  PENDING
+  PAID
+  CONTESTED
+  CANCELLED
+}
+
+// ===================
+// MODELS
+// ===================
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String
+  email        String    @unique
+  cpf          String    @unique
+  departmentId String?   @map("department_id") @db.Uuid
+  password     String
+  role         Role      @default(EMPLOYEE)
+  isActive     Boolean   @default(true) @map("is_active")
+  signInCount  Int       @default(0) @map("sign_in_count")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  department Department? @relation(fields: [departmentId], references: [id])
+
+  tripRequests  TripRequest[] @relation("TripRequester")
+  approvedTrips TripRequest[] @relation("TripApprover")
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  code        String?
+  priority    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users     User[]
+  auditLogs AuditLog[]
+
+  @@map("departments")
+}
+
+model Address {
+  id               String   @id @default(uuid()) @db.Uuid
+  placeId          String   @unique @map("place_id")
+  formattedAddress String   @map("formatted_address")
+  street           String?
+  number           String?
+  complement       String?
+  neighborhood     String?
+  city             String
+  state            String
+  postalCode       String?  @map("postal_code")
+  country          String
+  latitude         Float
+  longitude        Float
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  originTrips      TripRequest[]  @relation("StartAddress")
+  destinationTrips TripRequest[]  @relation("EndAddress")
+  waypoints        TripWaypoint[]
+
+  @@map("addresses")
+}
+
+model TripRequest {
+  id String @id @default(uuid()) @db.Uuid
+
+  startAddressId String  @map("start_address_id") @db.Uuid
+  endAddressId   String? @map("end_address_id") @db.Uuid
+
+  tripType           TripType   @map("trip_type")
+  scheduledDeparture DateTime   @map("scheduled_departure")
+  scheduledReturn    DateTime?  @map("scheduled_return")
+  reason             String
+  passengers         Json?
+  notes              String?
+  status             TripStatus @default(PENDING)
+  requesterId        String     @map("requester_id") @db.Uuid
+  approverId         String?    @map("approver_id") @db.Uuid
+  approvedAt         DateTime?  @map("approved_at")
+  driverId           String?    @map("driver_id") @db.Uuid
+  vehicleId          String?    @map("vehicle_id") @db.Uuid
+  requestedAt        DateTime   @default(now()) @map("requested_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+
+  proofFile     Bytes?  @map("proof_file")
+  proofFileName String? @map("proof_file_name")
+  proofMimeType String? @map("proof_mime_type")
+
+  isSelfDriving Boolean @default(false) @map("is_self_driving")
+
+  startAddress Address  @relation("StartAddress", fields: [startAddressId], references: [id])
+  endAddress   Address? @relation("EndAddress", fields: [endAddressId], references: [id])
+
+  requester User     @relation("TripRequester", fields: [requesterId], references: [id])
+  approver  User?    @relation("TripApprover", fields: [approverId], references: [id], onDelete: NoAction)
+  driver    Driver?  @relation(fields: [driverId], references: [id])
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  itinerary Itinerary?
+  waypoints TripWaypoint[]
+  charges   Charge[]
+
+  @@index([status, scheduledDeparture])
+  @@index([requesterId, requestedAt])
+  @@index([driverId])
+  @@index([vehicleId])
+  @@map("trip_requests")
+}
+
+model TripWaypoint {
+  id            String  @id @default(uuid()) @db.Uuid
+  tripRequestId String  @map("trip_request_id") @db.Uuid
+  addressId     String  @map("address_id") @db.Uuid
+  sequence      Int
+  notes         String?
+  isFinal       Boolean @default(false)
+
+  tripRequest TripRequest @relation(fields: [tripRequestId], references: [id], onDelete: Cascade)
+  address     Address     @relation(fields: [addressId], references: [id])
+
+  @@unique([tripRequestId, sequence])
+  @@index([tripRequestId, sequence])
+  @@map("trip_waypoints")
+}
+
+model Itinerary {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String?
+  distance      Float
+  duration      Float
+  directions    Json?
+  tripRequestId String   @unique @map("trip_request_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  tripRequest TripRequest @relation(fields: [tripRequestId], references: [id])
+
+  @@map("itineraries")
+}
+
+model Driver {
+  id        String       @id @default(uuid()) @db.Uuid
+  name      String
+  cpf       String       @unique
+  cnh       String       @unique
+  cnhType   CNHType      @map("cnh_type")
+  cnhValid  DateTime?    @map("cnh_valid")
+  phone     String?
+  notes     String?
+  status    DriverStatus @default(AVAILABLE)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  tripRequests TripRequest[]
+  infractions  Infraction[]
+
+  @@map("drivers")
+}
+
+model MaintenanceRecord {
+  id          String   @id @default(uuid()) @db.Uuid
+  vehicleId   String   @map("vehicle_id") @db.Uuid
+  date        DateTime @db.Date
+  mileage     Float
+  description String
+  cost        Float
+  provider    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("maintenance_records")
+}
+
+model Vehicle {
+  id              String            @id @default(uuid()) @db.Uuid
+  plate           String            @unique
+  brand           String?
+  model           String
+  vehicleType     VehicleType       @default(CAR) @map("vehicle_type")
+  year            Int
+  color           String
+  chassi          String            @unique
+  renavam         String            @unique
+  mileage         Float             @default(0.0)
+  fuelConsumption Float?            @map("fuel_consumption")
+  fuelType        FuelType?         @map("fuel_type")
+  transmission    TransmissionType? @map("transmission_type")
+  notes           String?
+  status          VehicleStatus     @default(AVAILABLE)
+  lastMaintenance DateTime?         @map("last_maintenance")
+  nextMaintenance DateTime?         @map("next_maintenance")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  tripRequests       TripRequest[]
+  infractions        Infraction[]
+  maintenanceHistory MaintenanceRecord[]
+
+  @@map("vehicles")
+}
+
+model Charge {
+  id            String     @id @default(uuid()) @db.Uuid
+  type          ChargeType
+  amount        Float
+  description   String?
+  date          DateTime   @db.Date
+  tripRequestId String     @map("trip_request_id") @db.Uuid
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  tripRequest TripRequest @relation(fields: [tripRequestId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([date])
+  @@map("charges")
+}
+
+model Infraction {
+  id          String           @id @default(uuid()) @db.Uuid
+  description String
+  amount      Float
+  date        DateTime         @db.Date
+  status      InfractionStatus @default(PENDING)
+  driverId    String           @map("driver_id") @db.Uuid
+  vehicleId   String           @map("vehicle_id") @db.Uuid
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  driver  Driver  @relation(fields: [driverId], references: [id])
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+
+  @@map("infractions")
+}
+
+model AuditLog {
+  id       String @id @default(uuid()) @db.Uuid
+  action   String
+  entity   String
+  entityId String @map("entity_id") @db.Uuid
+  oldData  Json?  @map("old_data") @db.JsonB
+  newData  Json?  @map("new_data") @db.JsonB
+  userId   String @map("user_id") @db.Uuid
+
+  departmentId String?     @map("department_id") @db.Uuid
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@index([departmentId])
+  @@map("audit_logs")
+}

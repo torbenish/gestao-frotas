@@ -1,0 +1,212 @@
+@baseUrl = http://localhost:3333
+@authToken = {{authenticate.response.body.access_token}}
+@vehicleId = {{create_vehicle.response.body.vehicle.id}}
+@driverId = {{create_driver.response.body.driver.id}}
+@addressId = {{create_address.response.body.address.id}}
+@tripRequestId = {{create_trip_request.response.body.tripRequest.id}}
+
+
+# @name create_account
+POST {{baseUrl}}/accounts
+Content-Type: application/json
+
+{
+  "name": "Diego Fernandes",
+  "cpf": "74728057003",
+  "email": "diego@rocketseat.com.br",
+  "password": "123456"
+}
+
+###
+
+# @name authenticate
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "diego@rocketseat.com.br",
+  "password": "123456"
+}
+
+###
+
+# @name profile_me
+GET {{baseUrl}}/me
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+Content-Type: application/json
+
+{
+  "email": "diego@rocketseat.com.br",
+  "password": "123456"
+}
+
+###
+
+# @name create_vehicle
+POST {{baseUrl}}/vehicles
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "plate": "ZHY3214",
+  "brand": "Honda",
+  "model": "Civic",
+  "vehicleType": "CAR",
+  "year": 2024,
+  "color": "Prata",
+  "chassi": "8BXxxxxxxxxxxxxxx",
+  "renavam": "00000000001",
+  "mileage": 14000.5,
+  "fuelConsumption": 9.5,
+  "fuelType": "GASOLINE",
+  "transmission": "AUTOMATIC",
+  "notes": "Veículo 2 novo para a frota.",
+  "status": "AVAILABLE",
+  "lastMaintenance": "2024-05-01T00:00:00.000Z",
+  "nextMaintenance": "2025-05-01T00:00:00.000Z"
+}
+
+###
+
+# *@name* get_vehicle_by_id
+GET {{baseUrl}}/vehicles/{{vehicleId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# @name fetch_recent_vehicles
+GET {{baseUrl}}/vehicles?page=1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+###
+
+# *@name* update_vehicle
+PATCH {{baseUrl}}/vehicles/{{vehicleId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "status": "IN_USE",
+  "mileage": 15200,
+  "color": "Preto",
+  "notes": "Veículo em uso pelo departamento comercial"
+}
+
+###
+
+# *@name* delete_vehicle
+DELETE {{baseUrl}}/vehicles/{{vehicleId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# @name create_driver
+POST {{baseUrl}}/drivers
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "João da Silva",
+  "cpf": "12345678901",
+  "cnh": "12345678910",
+  "cnhType": "B",
+  "cnhValid": "2028-05-10T00:00:00.000Z",
+  "phone": "+55 85 98888-7777",
+  "notes": "Motorista experiente",
+  "status": "AVAILABLE"
+}
+
+###
+
+# *@name* get_driver_by_id
+GET {{baseUrl}}/drivers/{{driverId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# *@name* update_driver
+PATCH {{baseUrl}}/drivers/{{driverId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "phone": "+55 85 97777-6666",
+  "status": "ON_TRIP",
+  "notes": "Saiu para viagem às 9h"
+}
+
+###
+
+# *@name* delete_driver
+DELETE {{baseUrl}}/drivers/{{driverId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# @name create_address
+POST {{baseUrl}}/addresses
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY5",
+  "formattedAddress": "Rua das Gloria, Fortaleza, Ceará, Brasil",
+  "street": "Rua das Flores",
+  "number": "123",
+  "complement": "Ap 101",
+  "neighborhood": "Centro",
+  "city": "Fortaleza",
+  "state": "Ceará",
+  "postalCode": "60000-000",
+  "country": "Brasil",
+  "latitude": -3.7,
+  "longitude": -38.5
+}
+
+###
+
+# *@name* search_addresses
+GET {{baseUrl}}/addresses/search?q=Rua das Flores
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# *@name* get_address_by_id
+GET {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# @name create_trip_request
+POST {{baseUrl}}/trip-requests
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "originId": "{{addressId}}",       
+  "tripType": "ONE_WAY",
+  "scheduledDeparture": "2025-08-25T09:00:00.000Z",
+  "reason": "Reunião com cliente",
+  "notes": "Levar material de apresentação",
+  "requesterId": "{{driverId}}"
+}
+
+###
+
+# *@name* get_trip_request_by_id
+GET {{baseUrl}}/trip-requests/{{tripRequestId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###

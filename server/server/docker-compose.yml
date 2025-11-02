@@ -1,0 +1,14 @@
+services:
+  postgres:
+    container_name: nest-frotas-pg
+    image: bitnami/postgresql:17
+    ports:
+      - "15432:5432"
+    env_file:
+      - .env
+    volumes:
+      - pg_data:/bitnami/postgresql
+    restart: unless-stopped
+
+volumes:
+  pg_data:
