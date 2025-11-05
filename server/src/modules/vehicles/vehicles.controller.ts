@@ -80,10 +80,6 @@ export class VehiclesController {
   @Delete(':id')
   @HttpCode(204)
   async delete(@Param('id') id: string, @CurrentUser() user: UserPayload) {
-    await this.vehiclesService.delete(
-      id,
-      user.sub,
-      user.departmentId ?? null
-    )
+    await this.vehiclesService.delete(id, user.sub, user.departmentId ?? null)
   }
 }

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Res,
   UseGuards,
   UsePipes,
 } from '@nestjs/common'
@@ -13,6 +14,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger'
+import { Response } from 'express'
 import { CurrentUser } from '@/common/decorators/current-user-decorator'
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard'
 import { ZodValidationPipe } from '@/common/pipes/zod-validation-pipe'
@@ -37,8 +39,29 @@ export class AuthenticateController {
     description: 'Login realizado com sucesso, token retornado',
   })
   @UsePipes(new ZodValidationPipe(authenticateSchema))
-  async login(@Body() body: AuthenticateSchema) {
-    return this.authService.authenticate(body.email, body.password)
+  async login(
+    @Body() body: AuthenticateSchema,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    const { access_token } = await this.authService.authenticate(
+      body.email,
+      body.password
+    )
+
+    // 5. Defina o cookie httpOnly
+    response.cookie('auth_token', access_token, {
+      httpOnly: true, // Impede acesso via JavaScript no cliente
+      secure: process.env.NODE_ENV !== 'development', // Use 'true' em produção (HTTPS)
+      path: '/', // O cookie estará disponível em todo o site
+      sameSite: 'strict', // Ajuda a prevenir CSRF
+      // maxAge: 60 * 60 * 24 * 7, // Opcional: define a validade (ex: 7 dias)
+    })
+
+    // 6. Retorne o token no corpo (para o client-side)
+    // Isso é importante! Manter isso permite que seu
+    // 'sign-in-form.tsx' e o 'axios.ts' continuem
+    // funcionando para chamadas de API no client-side.
+    return { access_token }
   }
   @Get('me')
   @ApiOperation({ summary: 'Retorna os dados do usuário autenticado' })
@@ -52,8 +75,11 @@ export class AuthenticateController {
     return {
       id: user.sub,
       role: user.role,
+      email: user.email,
       departmentId: user.departmentId ?? null,
       departmentName: user.departmentName ?? null,
+      departmentCode: user.departmentCode ?? null,
+      name: user.name ?? null,
     }
   }
 }

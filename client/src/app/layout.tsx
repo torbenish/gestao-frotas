@@ -1,9 +1,13 @@
+// app/layout.tsx
+
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import type React from "react";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme/theme-provider";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Toaster } from "sonner";
+
+// O Header NÃO é mais importado aqui
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import Providers from "./providers";
 
 const geistSans = Geist({
@@ -12,8 +16,21 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Sistema de Frotas",
-  description: "Gerenciamento de Viagens e Veículos",
+  title: {
+    default: "Gestão de Frotas",
+    template: "%s | Gestão de Frotas",
+  },
+  description: "Sistema de gerenciamento de viagens e veículos",
+  keywords: ["gestão de frotas", "veículos", "viagens", "painel", "sistema"],
+  authors: [{ name: "Sua empresa ou equipe" }],
+  openGraph: {
+    title: "Gestão de Frotas",
+    description: "Gerencie viagens e veículos com eficiência.",
+    type: "website",
+    locale: "pt_BR",
+    url: "https://seudominio.com",
+    siteName: "Gestão de Frotas",
+  },
 };
 
 export default function RootLayout({
@@ -23,6 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      {/* REMOVEMOS as classes flex daqui */}
       <body className={`${geistSans.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
@@ -30,15 +48,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* Providers é um client component que engloba QueryClientProvider */}
           <Providers>
-            <header className="p-4 flex justify-end">
-              <ThemeToggle />
-            </header>
-
+            {/* O Header e o Main saem daqui.
+                Renderizamos {children} diretamente. */}
             {children}
-
-            {/* Toaster do sonner — mantive aqui conforme seu layout */}
             <Toaster richColors />
           </Providers>
         </ThemeProvider>

@@ -1,4 +1,3 @@
-// src/api/departments.ts
 import { api } from "@/lib/axios";
 
 export type Department = {

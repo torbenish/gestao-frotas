@@ -9,8 +9,11 @@ import { Role } from '@/generated/client'
 const tokenPayloadSchema = z.object({
   sub: z.string().uuid(),
   role: z.nativeEnum(Role),
+  email: z.string().email().nullable().optional(),
   departmentId: z.string().uuid().nullable().optional(),
   departmentName: z.string().min(1).nullable().optional(),
+  departmentCode: z.string().min(1).nullable().optional(),
+  name: z.string().min(1).nullable().optional(),
 })
 
 export type UserPayload = z.infer<typeof tokenPayloadSchema>
@@ -28,7 +31,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: UserPayload) {
-    console.log('JWT Payload recebido:', payload)
     return tokenPayloadSchema.parse(payload)
   }
 }

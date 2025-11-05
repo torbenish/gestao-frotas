@@ -8,6 +8,12 @@ interface SignUpBody {
   departmentId?: string | null;
 }
 
-export async function signUp({ name, email, cpf, password, departmentId }: SignUpBody) {
+export async function signUp({
+  name,
+  email,
+  cpf,
+  password,
+  departmentId,
+}: SignUpBody) {
   await api.post("/accounts", { name, email, cpf, password, departmentId });
 }

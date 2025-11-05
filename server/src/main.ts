@@ -40,7 +40,6 @@ async function bootstrap() {
 
   await app.listen(port)
   console.log(`🚗 Server running at http://localhost:${port}`)
-  console.log(`📘 Swagger docs available at http://localhost:${port}/api`)
   console.log(
     `🌐 CORS liberado para: ${isProd ? frontendUrl : 'http://localhost:3000'}`
   )

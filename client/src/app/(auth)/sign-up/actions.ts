@@ -20,7 +20,13 @@ export async function signUpAction(data: z.infer<typeof signUpSchema>) {
   const cleanedCpf = cpf.replace(/[^\d]/g, "");
 
   try {
-    await signUp({ name, email, password, cpf: cleanedCpf, departmentId: departmentId ?? null });
+    await signUp({
+      name,
+      email,
+      password,
+      cpf: cleanedCpf,
+      departmentId: departmentId ?? null,
+    });
   } catch (err) {
     if (err instanceof AxiosError && err.response) {
       const message = err.response.data.message || "Ocorreu um erro.";

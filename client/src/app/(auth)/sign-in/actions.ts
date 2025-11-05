@@ -25,7 +25,6 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
       return { success: false, message: "Token não recebido do servidor." };
     }
 
-    // Salva token no browser (menos seguro; uso temporário)
     if (typeof window !== "undefined")
       localStorage.setItem("accessToken", token);
 

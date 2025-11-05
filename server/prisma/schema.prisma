@@ -81,8 +81,8 @@ enum CNHType {
 }
 
 enum ChargeType {
-  FUEL // Combustivel
-  TOLL // Pedagio
+  FUEL // Combustível
+  TOLL // Pedágio
   PARKING //Estacionamento
   ACCOMMODATION //Hospedagem
   MEALS //Alimentação/Refeição

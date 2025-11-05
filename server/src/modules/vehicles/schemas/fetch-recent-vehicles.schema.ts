@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const pageQueryParamSchema = z
   .string()
   .optional()
   .default('1')
   .transform(Number)
-  .pipe(z.number().min(1));
+  .pipe(z.number().min(1))
 
-export type PageQueryParamSchema = z.infer<typeof pageQueryParamSchema>;
+export type PageQueryParamSchema = z.infer<typeof pageQueryParamSchema>

@@ -85,6 +85,6 @@ describe('TripRequests (E2E)', () => {
       .get('/trip-requests/nonexistent-id')
       .set('Authorization', `Bearer ${accessToken}`)
 
-    expect([404, 400]).toContain(response.statusCode) 
+    expect([404, 400]).toContain(response.statusCode)
   })
 })
