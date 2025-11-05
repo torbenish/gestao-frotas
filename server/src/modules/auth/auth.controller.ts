@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Res,
   UseGuards,
@@ -47,22 +49,77 @@ export class AuthenticateController {
       body.email,
       body.password
     )
-
-    // 5. Defina o cookie httpOnly
     response.cookie('auth_token', access_token, {
-      httpOnly: true, // Impede acesso via JavaScript no cliente
-      secure: process.env.NODE_ENV !== 'development', // Use 'true' em produção (HTTPS)
-      path: '/', // O cookie estará disponível em todo o site
-      sameSite: 'strict', // Ajuda a prevenir CSRF
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      path: '/',
+      sameSite: 'strict',
       // maxAge: 60 * 60 * 24 * 7, // Opcional: define a validade (ex: 7 dias)
     })
 
-    // 6. Retorne o token no corpo (para o client-side)
-    // Isso é importante! Manter isso permite que seu
-    // 'sign-in-form.tsx' e o 'axios.ts' continuem
-    // funcionando para chamadas de API no client-side.
     return { access_token }
   }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Desloga o usuário e limpa cookies de autenticação',
+  })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Logout realizado com sucesso e cookies limpos',
+    schema: {
+      example: { message: 'Logged out successfully' },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autenticado / token inválido',
+    schema: {
+      example: { statusCode: 401, message: 'Unauthorized' },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro interno ao processar logout',
+    schema: {
+      example: { message: 'Failed to log out' },
+    },
+  })
+  @UseGuards(JwtAuthGuard)
+  async logout(
+    @CurrentUser() _user: UserPayload,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    try {
+      // --- opcional: revogar refresh token no DB/Redis ---
+      // await this.authService.revokeRefreshTokenForUser(user.sub)
+
+      // Limpa cookies de autenticação
+      res.clearCookie('refreshToken', {
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'lax',
+      })
+
+      res.clearCookie('auth_token', {
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'lax',
+      })
+
+      return { message: 'Logged out successfully' }
+    } catch (_err) {
+      // log do erro (opcional: usar Logger)
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+        message: 'Failed to log out',
+      })
+    }
+  }
+
   @Get('me')
   @ApiOperation({ summary: 'Retorna os dados do usuário autenticado' })
   @ApiBearerAuth()
